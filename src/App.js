@@ -1,6 +1,7 @@
 import React,{Component} from "react";
 import Navbar from "./component/navbar/navbar";
 import Homepage from './pages/homepage/homepage';
+import Profile from './pages/profile/profile'
 import Authenticate from "./pages/authentication/authenticate";
 import * as actions from './store/actions/userAuthActions';
 import {connect} from "react-redux";
@@ -22,6 +23,7 @@ class App extends Component {
                         <Redirect from="/" to="/home" exact/>
                         <Route path="/home" component={Homepage}/>
                         <Route path="/authenticate" component={Authenticate}/>
+                        <Route path="/user/profile" component={Profile}/>
 
                     </Switch>
                 </React.Fragment>
