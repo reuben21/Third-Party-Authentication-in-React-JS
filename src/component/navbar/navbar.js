@@ -15,6 +15,9 @@ import Grid from '@material-ui/core/Grid';
 import MenuIcon from '@material-ui/icons/Menu';
 import css from './Navbar.module.css'
 import firebase from "../../firebaseConfig/firebaseConfig";
+import {Redirect} from "react-router";
+import * as actions from "../../store/actions/userAuthActions";
+import {connect} from "react-redux";
 
 
 class Navbar extends Component {
@@ -25,7 +28,8 @@ class Navbar extends Component {
         anchorDrawer: false,
         anchorDrawerEl: false,
         AvatarInitails: "",
-        isAuth:false
+        isAuth:false,
+        logOut:false
     }
 
     componentDidMount() {
@@ -59,9 +63,15 @@ class Navbar extends Component {
         // console.log(this.context.priority)
     };
 
+
+    loggingOutUser = () =>{
+        firebase.auth().signOut()
+
+    }
+
     render() {
 
-        //https://colorhunt.co/palette/253250
+        //https://colorhunt.co/palette/253250W
         // const {classes} = {...this.props};
 
         const list = (anchor) => (
@@ -84,7 +94,7 @@ class Navbar extends Component {
                     width: "100px",
                     height: "100px",
                     fontSize: "20px"
-                }}>{this.props.user_type}</Avatar>
+                }}>{this.props.userType}</Avatar>
                 <Divider/>
                 <List>
 
@@ -96,13 +106,13 @@ class Navbar extends Component {
                         alignItems="center"
                     >
 
-                        {this.state.isAuth && <ColorButton component={NavLink} to={"/user/profile"} color="inherit" style={{
+                        {this.props.isAuth && <ColorButton component={NavLink} to={"/user/profile"} color="inherit" style={{
                             width: "200px",
                             marginTop:"20%"
 
                         }}>Profile</ColorButton> }
 
-                        {this.state.isAuth && <ColorButton onClick={()=>firebase.auth().signOut()} color="inherit" style={{
+                        {this.props.isAuth && <ColorButton onClick={()=>this.loggingOutUser()} color="inherit" style={{
                             width: "200px",
                             marginTop:"20%"
 
@@ -212,7 +222,7 @@ class Navbar extends Component {
                         {/*))}*/}
                         </span>
                         <span className={css.categories_Css}>
-                        <ColorButton color="inherit" component={NavLink} to={"home"}>Home</ColorButton>
+                        <ColorButton color="inherit" component={NavLink} to={"/home"}>Home</ColorButton>
 
 
 
@@ -223,7 +233,7 @@ class Navbar extends Component {
 
                         </div>
                         {
-                            this.state.isAuth ?
+                            this.props.isAuth ?
                                 <>   <div>
                                     {["right"].map((anchor) => (
                                         <React.Fragment key={anchor}>
@@ -270,32 +280,22 @@ class Navbar extends Component {
 }
 
 // const mapStateToProps = state => {
-//     console.log("APP JS STATE: ", state.token)
-//     return {
-//         isAuthenticated: state.token !== null,
-//         isAdmin: state.admin_priority
-//     }
-// }
-
-// const mapStateToProps = state => {
 //
 //     return {
-//         isAuthenticated: state.patientReducer.token || state.hospitalReducer.token !== null,
-//         isAdmin: state.patientReducer.admin_priority === null ? state.hospitalReducer.token : state.patientReducer.admin_priority,
-//         user_type:state.patientReducer.user_type === null ? state.hospitalReducer.user_type : state.patientReducer.user_type,
-//         user_id:state.patientReducer.user_id === null ? state.hospitalReducer.user_id : state.patientReducer.user_id,
+//         isAuth: state.user.refreshToken !== null,
+//         userType: state.user.userType,
+//         userId:state.user.userId,
+//         emailId:state.user.emailId
 //
 //     }
 // }
-//
-//
 //
 // const mapDispatchToProps = dispatch => {
 //     return {
 //         onTryAutoSignUp: () => dispatch(actions.authCheckState()),
-//         logout: () => dispatch(actions.logout()),
-//         logoutHospital: () => dispatch(actions2.logout())
 //     }
 // }
+//
+// export default connect(mapStateToProps, mapDispatchToProps)(Navbar);
 export default (Navbar);
 // export default connect(mapStateToProps, mapDispatchToProps)(Navbar);

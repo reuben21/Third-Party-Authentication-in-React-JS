@@ -5,6 +5,8 @@ import StyledFirebaseUI from "react-firebaseui/StyledFirebaseAuth";
 import {Redirect} from 'react-router';
 import Css from "../profile/profile.module.css";
 import CssTextField from "../../component/TextField/TextField";
+import * as actions from "../../store/actions/userAuthActions";
+import {connect} from "react-redux";
 
 class Authenticate extends Component {
     state = {
@@ -29,7 +31,9 @@ class Authenticate extends Component {
         ],
         callbacks: {
             signInSuccessWithAuthResult: () => {
+                this.props.onAuthLogin()
                 this.setState({
+
                     redirect:true
                 })
             }
@@ -39,6 +43,7 @@ class Authenticate extends Component {
     componentDidMount = () => {
 
         firebase.auth().onAuthStateChanged(user => {
+
             this.setState({
                 isAuth: !!user,
             })
@@ -53,7 +58,7 @@ class Authenticate extends Component {
         return (
             <div className={css.App}>
                 {
-                    this.state.isAuth ?
+                    this.props.isAuth ?
                         <>
                             <div style={{
                                 display: "flex",
@@ -76,4 +81,23 @@ class Authenticate extends Component {
 
 }
 
-export default Authenticate;
+const mapStateToProps = state => {
+
+    return {
+        isAuth: state.user.refreshToken !== null,
+        userType: state.user.userType,
+        userId:state.user.userId,
+        emailId:state.user.emailId
+
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onAuthLogin: () => dispatch(actions.userAuthentication()),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Authenticate);
+
+// export default Authenticate;

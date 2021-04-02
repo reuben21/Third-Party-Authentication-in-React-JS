@@ -2,9 +2,11 @@ import React, {Component} from "react";
 import CssTextField from "../../component/TextField/TextField";
 import Css from './profile.module.css';
 import firebase  from "../../firebaseConfig/firebaseConfig";
+import {Redirect} from "react-router";
 
 class Profile extends Component{
     state={
+        redirect:false,
         photoURL:null,
         displayName:null,
         emailId:null,
@@ -12,17 +14,27 @@ class Profile extends Component{
     }
     componentDidMount() {
         firebase.auth().onAuthStateChanged(user => {
-            this.setState({
-                photoURL:user.photoURL,
-                displayName:user.displayName,
-                emailId:user.email,
-                phoneNumber:user.phoneNumber,
-            })
-            console.log("user", user)
+            if (user === null) {
+                this.setState({
+                    redirect:true
+                })
+            } else {
+                this.setState({
+                    photoURL:user.photoURL,
+                    displayName:user.displayName,
+                    emailId:user.email,
+                    phoneNumber:user.phoneNumber,
+                })
+                console.log("user", user)
+            }
+
         })
     }
 
     render(){
+        if (this.state.redirect){
+            return <Redirect to={'/'}/>;
+        }
         return (
             <>
                 <div style={{
@@ -51,5 +63,6 @@ class Profile extends Component{
 
 
 }
+
 
 export default Profile;
