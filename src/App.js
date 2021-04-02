@@ -2,14 +2,16 @@ import React,{Component} from "react";
 import Navbar from "./component/navbar/navbar";
 import Homepage from './pages/homepage/homepage';
 import Authenticate from "./pages/authentication/authenticate";
+import * as actions from './store/actions/userAuthActions';
+import {connect} from "react-redux";
 import {BrowserRouter, Redirect, Route, Switch} from "react-router-dom";
 
 
 class App extends Component {
 
-    // componentDidMount() {
-    //   this.props.onTryAutoSignUp();
-    // }
+    componentDidMount() {
+      this.props.onTryAutoSignUp();
+    }
 
     render() {
         return (
@@ -30,4 +32,21 @@ class App extends Component {
 
 }
 
-export default (App);
+const mapStateToProps = state => {
+
+  return {
+    isAuth: state.user.refreshToken !== null,
+    userType: state.user.userType,
+    userId:state.user.userId,
+    emailId:state.user.emailId
+
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onTryAutoSignUp: () => dispatch(actions.authCheckState()),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

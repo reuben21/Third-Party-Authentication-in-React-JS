@@ -1,4 +1,5 @@
 import * as actionTypes from './actionTypes';
+import firebase from "../../firebaseConfig/firebaseConfig";
 
 export const authStart = () => {
     return {
@@ -6,12 +7,14 @@ export const authStart = () => {
     };
 }
 
-export const authSuccess = (token, user_type,user_id) => {
+export const authSuccess = (refreshToken,userType,userId,emailId,phoneNumber) => {
     return {
         type: actionTypes.AUTH_SUCCESS,
-        token: token,
-        user_type: user_type,
-        user_id: user_id,
+        refreshToken: refreshToken,
+        userType: userType,
+        userId: userId,
+        emailId:emailId,
+        phoneNumber:phoneNumber
 
     };
 }
@@ -27,9 +30,14 @@ export const authFail = (error) => {
 
 export const logout = () => {
     // console.log("ENTERED ACTIONS?AUTH JS LOGOUT")
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_type');
-    localStorage.removeItem('user_id');
+
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userType');
+    localStorage.removeItem('emailId');
+    localStorage.removeItem('phoneNumber');
+    localStorage.removeItem('expirationDate');
+
     return {
         type: actionTypes.AUTH_LOGOUT,
     }
@@ -44,95 +52,45 @@ export const checkAuthTimeout = expirationTime => {
     }
 }
 
-export const patientAuthLogin = (email_id, password) => {
+export const userAuthentication = () => {
     return dispatch => {
         dispatch(authStart());
-        fetch('http://127.0.0.1:4000/patient/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-                // 'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: JSON.stringify({
-                email: email_id,
-                password: password
-            })
-        })
-            .then(resp => resp.json())
-            .then(data => {
-                console.log(data)
-                const token = data.tokens[0].token;
-                const user_id = data._id;
-                const user_type = "Patient";
+        const emailId = firebase.auth().currentUser.email;
+        const refreshToken = firebase.auth().currentUser.refreshToken;
+        const userId = firebase.auth().currentUser.uid;
+        const phoneNumber = firebase.auth().currentUser.phoneNumber;
+
+                const userType = "";
                 const expirationDate = new Date(new Date().getTime() + 3600 * 1000);
-                console.log("AUTH LOGIN DATA PRINTING", token,"\n",
 
-                expirationDate)
-                localStorage.setItem('token', token);
-                localStorage.setItem('user_id', user_id);
-                localStorage.setItem('user_type', user_type);
-
+                localStorage.setItem('refreshToken', firebase.auth().currentUser.refreshToken);
+                localStorage.setItem('userId', firebase.auth().currentUser.uid);
+                localStorage.setItem('userType', userType);
+                localStorage.setItem('emailId', firebase.auth().currentUser.email);
+                localStorage.setItem('phoneNumber', firebase.auth().currentUser.phoneNumber);
                 localStorage.setItem('expirationDate', expirationDate);
-                 dispatch(authSuccess(token,user_type,user_id ))
+                dispatch(authSuccess(refreshToken,userType,userId,emailId,phoneNumber ))
                 dispatch(checkAuthTimeout(3600));
 
-            })
-            .catch((error) => {
-                dispatch(authFail(error))
-                console.log(error);
-            });
 
 
     };
 }
-
-export const patientAuthSignup = (first_name, last_name, email_id, password, date, phone_no, gender) => {
-    return dispatch => {
-        dispatch(authStart());
-        const dataReceivedAfterSubmitting = fetch('http://127.0.0.1:4000/patient/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-                // 'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: JSON.stringify({
-                firstName: first_name,
-                lastName: last_name,
-                email: email_id,
-                password: password,
-                birth_date: date,
-                phoneNo: phone_no,
-                gender: gender,
-            })
-        })
-            .then(resp => resp.json())
-            .then(data => {
-                console.log(data)
-
-                return data
-
-
-            })
-            .catch((error) => {
-                dispatch(authFail(error))
-               return error;
-            });
-        return dataReceivedAfterSubmitting;
-
-
-    };
-}
-
-
 
 export const authCheckState = () => {
     return dispatch => {
-        const token = localStorage.getItem('token');
-        const admin_priority = localStorage.getItem('admin_priority');
-        const subscriber_priority = localStorage.getItem('subscriber_priority');
-        const journalist_priority = localStorage.getItem('journalist_priority');
-        console.log("AUTH CHECK STATE ", token);
-        if (token === null || token === 'undefined') {
+
+        const refreshToken =  firebase.auth().currentUser.refreshToken !== null;
+        const userId =  firebase.auth().currentUser.uid;
+
+        const userType = "";
+
+        const emailId =  firebase.auth().currentUser.email;
+        const phoneNumber =  firebase.auth().currentUser.phoneNumber;
+
+
+        console.log("AUTH CHECK STATE ", refreshToken);
+        if (refreshToken === null || refreshToken === 'undefined') {
 
             dispatch(logout())
         } else {
@@ -140,7 +98,7 @@ export const authCheckState = () => {
             if (expirationDate <= Date()) {
                 dispatch(logout())
             } else {
-                dispatch(authSuccess(token, admin_priority,subscriber_priority,journalist_priority))
+                dispatch(authSuccess(refreshToken,userType,userId,emailId,phoneNumber))
                 dispatch(checkAuthTimeout((expirationDate.getTime() - new Date().getTime()) / 1000))
             }
         }

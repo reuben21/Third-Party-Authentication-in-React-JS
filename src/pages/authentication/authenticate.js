@@ -7,6 +7,8 @@ class Authenticate extends Component{
     state = {
         isAuth:false
     }
+
+
     uiConfig = {
         signInFlow: "popup",
         signInOptions: [
@@ -18,7 +20,9 @@ class Authenticate extends Component{
             firebase.auth.PhoneAuthProvider.PROVIDER_ID
         ],
         callbacks: {
-            signInSuccess: () => false
+            signInSuccess: () => {
+                console.log("Sign In Success")
+            }
         }
     }
 
@@ -26,7 +30,7 @@ class Authenticate extends Component{
 
         firebase.auth().onAuthStateChanged(user => {
             this.setState({ isAuth: !!user })
-            console.log("user", !!user)
+            console.log("user", user)
         })
     }
     render() {
@@ -39,6 +43,8 @@ class Authenticate extends Component{
                             <h1>{firebase.auth().currentUser.displayName}</h1>
                             <h1>{firebase.auth().currentUser.email}</h1>
                             <h1>{firebase.auth().currentUser.phoneNumber}</h1>
+                            <h1>{firebase.auth().currentUser.uid}</h1>
+                            <h1>{firebase.auth().currentUser.refreshToken}</h1>
                             <img src={firebase.auth().currentUser.photoURL} width={200} alt=""/>
                             <br/>
                             <button onClick={()=>firebase.auth().signOut()}>Sign Out</button>
