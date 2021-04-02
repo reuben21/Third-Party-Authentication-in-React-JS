@@ -20,7 +20,7 @@ class Authenticate extends Component{
             firebase.auth.PhoneAuthProvider.PROVIDER_ID
         ],
         callbacks: {
-            signInSuccess: () => {
+            signInSuccessWithAuthResult: () => {
                 console.log("Sign In Success")
             }
         }

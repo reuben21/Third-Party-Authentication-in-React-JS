@@ -7,14 +7,14 @@ export const authStart = () => {
     };
 }
 
-export const authSuccess = (refreshToken,userType,userId,emailId,phoneNumber) => {
+export const authSuccess = (refreshToken, userType, userId, emailId, phoneNumber) => {
     return {
         type: actionTypes.AUTH_SUCCESS,
         refreshToken: refreshToken,
         userType: userType,
         userId: userId,
-        emailId:emailId,
-        phoneNumber:phoneNumber
+        emailId: emailId,
+        phoneNumber: phoneNumber
 
     };
 }
@@ -38,6 +38,8 @@ export const logout = () => {
     localStorage.removeItem('phoneNumber');
     localStorage.removeItem('expirationDate');
 
+    firebase.auth().signOut()
+
     return {
         type: actionTypes.AUTH_LOGOUT,
     }
@@ -60,18 +62,17 @@ export const userAuthentication = () => {
         const userId = firebase.auth().currentUser.uid;
         const phoneNumber = firebase.auth().currentUser.phoneNumber;
 
-                const userType = "";
-                const expirationDate = new Date(new Date().getTime() + 3600 * 1000);
+        const userType = "";
+        const expirationDate = new Date(new Date().getTime() + 3600 * 1000);
 
-                localStorage.setItem('refreshToken', firebase.auth().currentUser.refreshToken);
-                localStorage.setItem('userId', firebase.auth().currentUser.uid);
-                localStorage.setItem('userType', userType);
-                localStorage.setItem('emailId', firebase.auth().currentUser.email);
-                localStorage.setItem('phoneNumber', firebase.auth().currentUser.phoneNumber);
-                localStorage.setItem('expirationDate', expirationDate);
-                dispatch(authSuccess(refreshToken,userType,userId,emailId,phoneNumber ))
-                dispatch(checkAuthTimeout(3600));
-
+        localStorage.setItem('refreshToken', firebase.auth().currentUser.refreshToken);
+        localStorage.setItem('userId', firebase.auth().currentUser.uid);
+        localStorage.setItem('userType', userType);
+        localStorage.setItem('emailId', firebase.auth().currentUser.email);
+        localStorage.setItem('phoneNumber', firebase.auth().currentUser.phoneNumber);
+        localStorage.setItem('expirationDate', expirationDate);
+        dispatch(authSuccess(refreshToken, userType, userId, emailId, phoneNumber))
+        dispatch(checkAuthTimeout(3600));
 
 
     };
@@ -79,29 +80,38 @@ export const userAuthentication = () => {
 
 export const authCheckState = () => {
     return dispatch => {
+        firebase.auth().onAuthStateChanged(user => {
 
-        const refreshToken =  firebase.auth().currentUser.refreshToken !== null;
-        const userId =  firebase.auth().currentUser.uid;
-
-        const userType = "";
-
-        const emailId =  firebase.auth().currentUser.email;
-        const phoneNumber =  firebase.auth().currentUser.phoneNumber;
+            if (user === null || user === 'undefined') {
 
 
-        console.log("AUTH CHECK STATE ", refreshToken);
-        if (refreshToken === null || refreshToken === 'undefined') {
 
-            dispatch(logout())
-        } else {
-            const expirationDate = new Date(localStorage.getItem('expirationDate'));
-            if (expirationDate <= Date()) {
                 dispatch(logout())
             } else {
-                dispatch(authSuccess(refreshToken,userType,userId,emailId,phoneNumber))
-                dispatch(checkAuthTimeout((expirationDate.getTime() - new Date().getTime()) / 1000))
+
+                const refreshToken = user.refreshToken;
+                const userId = user.uid;
+
+                const userType = "";
+
+                const emailId = user.email;
+                const phoneNumber =user.phoneNumber;
+
+
+
+                const expirationDate = new Date(localStorage.getItem('expirationDate'));
+                if (expirationDate <= Date()) {
+                    dispatch(logout())
+                } else {
+                    dispatch(authSuccess(refreshToken, userType, userId, emailId, phoneNumber))
+                    dispatch(checkAuthTimeout((expirationDate.getTime() - new Date().getTime()) / 1000))
+                }
             }
-        }
+            // console.log("user", user)
+
+
+        })
+
     }
 }
 
