@@ -1,5 +1,5 @@
 import React ,{Component} from 'react';
-import './App.css';
+import css from './auth.module.css';
 import firebase  from "../../firebaseConfig/firebaseConfig";
 import StyledFirebaseUI from  "react-firebaseui/StyledFirebaseAuth";
 
@@ -31,7 +31,7 @@ class Authenticate extends Component{
     }
     render() {
         return (
-            <div className="App">
+            <div className={css.App}>
                 {
                     this.state.isAuth ?
                         <>
@@ -44,7 +44,7 @@ class Authenticate extends Component{
                             <button onClick={()=>firebase.auth().signOut()}>Sign Out</button>
                         </>
                         :
-                        <StyledFirebaseUI uiConfig={this.uiConfig} firebaseAuth={firebase.auth()}/>
+                        <StyledFirebaseUI  uiConfig={this.uiConfig} firebaseAuth={firebase.auth()}/>
                 }
             </div>
         );
